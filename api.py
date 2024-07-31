@@ -56,13 +56,26 @@ class User(Resource):
         user = UserModel.query.filter_by(id=id).first()
 
         if not user:
-            return (404, "User not found")
+            abort (404, "User not found")
         
         db.session.delete(user)
         db.session.commit()
         users = UserModel.query.all()
         return users
     
+    @marshal_with(userFields)
+    def patch(self, id):
+        user = UserModel.query.filter_by(id=id).first()
+        args = user_args.parse_args()
+
+        if not user:
+            abort (404, "User not found")
+        
+        user.name = args["name"]
+        user.email = args["email"]
+        db.session.commit()
+        users = UserModel.query.all()
+        return users
 
 api.add_resource(Users, '/api/users/')
 api.add_resource(User, '/api/users/<int:id>')
